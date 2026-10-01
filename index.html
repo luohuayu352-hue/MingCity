@@ -809,14 +809,18 @@
 
     <!-- 應用主體 -->
     <div id="main-app">
-        <header>
-            <h1>鳴市無神</h1>
-        </header>
+      <!-- 給標題加上 id 與過渡動畫，並設定固定在頂部 -->
+<header id="top-header" style="position: fixed; top: 0; left: 0; width: 100%; background: #0a0a0a; z-index: 9999; transition: transform 0.3s ease-in-out; border-bottom: 1px solid #222;">
+    <h1 style="margin: 15px 0; color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.8); text-align: center;">鳴市無神</h1>
+</header>
+<!-- 加上一個隱形的墊高區塊，避免 fixed 固定標題後，把下面的內容擋住 -->
+<div style="height: 70px;"></div>
 
         <main>
             <!-- 分頁1: 鳴市 -->
                         <!-- 分頁1: 鳴市 -->
             <section id="tab-1" class="tab-content active">
+                
                 
              <!-- 頂部市徽與次級選單 (固定顯示) -->
 <div class="jianghu-card" style="text-align: center; padding-bottom: 5px; margin-bottom: 10px;">
@@ -2117,6 +2121,12 @@
                                     <li><span style="color:#ff4422;">三弟子 沙祁川：</span>代號「餘灰」。現創立灰港，為法外清算者。</li>
                                     <li><span style="color:#ff4422;">四弟子 洛熠梵：</span>道上尊稱「鴉紅」。洛爺之女，現主持鏡流俱樂部。</li>
                                 </ul>
+                                   <!-- 加入這個加密通訊觸發按鈕 -->
+        <div style="margin-top: 25px; text-align: center;">
+            <button class="char-btn" style="width: 100%; padding: 12px; background: rgba(0, 20, 10, 0.8); border: 1px solid #00ff66; border-radius: 4px; color: #00ff66; font-family: monospace; font-size: 14px; letter-spacing: 2px; box-shadow: 0 0 15px rgba(0,255,102,0.2);" onclick="document.getElementById('modal-disciples-chat').style.display = 'block'">
+                [ ACCESS ENCRYPTED COMM : 師門機密通訊 ]
+            </button>
+        </div>
                             </div>
                         </div>
 
@@ -2157,8 +2167,7 @@
                     <div class="theme-card theme-dongzhou" style="padding-bottom: 20px;">
                         
                         <div class="theme-title">東洲會</div>
-                                                <!-- 陣營浮水印 (東洲會) -->
-                        <img src="https://images.plurk.com/2pyvJq2kTlkndtAzFTqjm.jpg" style="position: absolute; top: 150px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; opacity: 0.15; z-index: 1; pointer-events: none; mix-blend-mode: screen;" alt="東洲會水印">
+                                           
 
                         <!-- 人物風雲錄 按鈕 -->
                         <div style="position:relative; z-index:2; text-align:right;">
@@ -6936,27 +6945,33 @@
 
         </div>
     </div>
-        <!-- 機密通訊：八狼穴 (全螢幕彈窗 - 完整 Discord UI - 手機滾動修復版) -->
+         <!-- 機密通訊：八狼穴 (全螢幕彈窗 - 完整 Discord UI - 多頻道切換版) -->
     <div id="modal-eight-wolves-dc" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); z-index: 10000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
         
-        <!-- 加入專屬 CSS 來處理手機版排版與滾動問題 -->
+        <!-- Discord UI 專屬 CSS -->
         <style>
             .dc-box { margin: 20px auto; width: 95%; max-width: 1000px; height: 90vh; background: #36393f; border-radius: 8px; display: flex; flex-direction: row; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; }
             .dc-sidebar { width: 240px; background: #2f3136; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid #202225; }
             .dc-channels { padding: 10px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-            .dc-channel-item { padding: 6px 10px; border-radius: 4px; margin-bottom: 2px; cursor: pointer; font-size: 14px; white-space: nowrap; }
+            .dc-channel-item { padding: 6px 10px; border-radius: 4px; margin-bottom: 2px; cursor: pointer; font-size: 14px; white-space: nowrap; color: #8e9297; transition: background 0.2s; }
+            .dc-channel-item:hover { background: rgba(79,84,92,0.16); color: #dcddde; }
+            .dc-channel-item.active-tab { background: rgba(79,84,92,0.32) !important; color: #fff !important; }
+            .dc-channel-item.nsfw-tab { color: #f04747; }
+            .dc-channel-item.nsfw-tab.active-tab { background: rgba(240, 71, 71, 0.1) !important; color: #f04747 !important; }
             
-            /* 關鍵修復：加上 min-height: 0 和 overflow: hidden 避免內容撐爆容器，讓內層能正常出現滾動條 */
             .dc-main { flex: 1; display: flex; flex-direction: column; background: #36393f; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
             
-            /* 關鍵修復：獨立抽出訊息區塊，加上觸控滑動優化 */
-            .dc-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
+            /* 控制頻道顯示隱藏的類別 */
+            .dc-chat-view { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+            .dc-chat-view.active-view { display: flex; }
             
+            .dc-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
             .dc-msg-row { display: flex; margin-bottom: 20px; }
             .dc-msg-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 15px; flex-shrink: 0; }
             .dc-msg-body { flex: 1; min-width: 0; word-break: break-word; }
+            .dc-sys-msg { color: #72767d; font-size: 13px; font-style: italic; text-align: center; margin-bottom: 15px; font-weight: bold; border-top: 1px solid #2f3136; padding-top: 10px; }
             
-            /* 手機螢幕 (寬度小於 768px) 的專屬排版 */
+            /* 手機螢幕優化 */
             @media (max-width: 768px) {
                 .dc-box { margin: 10px auto; width: 98%; height: 95vh; flex-direction: column; }
                 .dc-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #202225; flex-shrink: 0; }
@@ -6964,9 +6979,26 @@
                 .dc-channel-item { display: inline-block; margin-bottom: 0; margin-right: 8px; font-size: 13px; }
                 .dc-msg-row { margin-bottom: 15px; }
                 .dc-msg-avatar { width: 35px; height: 35px; margin-right: 10px; }
-                .dc-main-header { padding: 10px 15px !important; padding-right: 40px !important; } /* 留空間給右上角的叉叉 */
+                .dc-main-header { padding: 10px 15px !important; padding-right: 40px !important; }
             }
         </style>
+
+        <!-- 頻道切換用的 JavaScript -->
+        <script>
+            function switchDcChannel(viewId, elm) {
+                // 重置所有按鈕樣式
+                var tabs = document.querySelectorAll('.dc-channel-item');
+                tabs.forEach(function(t) { t.classList.remove('active-tab'); });
+                // 標記當前按鈕
+                elm.classList.add('active-tab');
+                
+                // 隱藏所有聊天區
+                var views = document.querySelectorAll('.dc-chat-view');
+                views.forEach(function(v) { v.classList.remove('active-view'); });
+                // 顯示目標聊天區
+                document.getElementById(viewId).classList.add('active-view');
+            }
+        </script>
 
         <div class="dc-box">
             
@@ -6975,172 +7007,361 @@
 
             <!-- 側邊頻道欄 -->
             <div class="dc-sidebar">
-                <!-- Server Header -->
                 <div style="padding: 15px; font-weight: bold; color: white; border-bottom: 1px solid #202225; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     🐺 八狼穴 (Top Secret)
                 </div>
-                <!-- 頻道列表 -->
                 <div class="dc-channels">
                     <div style="color: #8e9297; font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">文字頻道</div>
                     
-                    <div class="dc-channel-item" style="background: rgba(79,84,92,0.32); color: #fff;">
-                        <span style="color: #72767d; margin-right: 5px;">#</span> 吹水區 (Men's talk)
+                    <div class="dc-channel-item active-tab" onclick="switchDcChannel('view-menstalk', this)">
+                        <span style="margin-right: 5px;">#</span> 吹水區 (Men's talk)
                     </div>
-                    <div class="dc-channel-item" style="color: #8e9297;">
-                        <span style="color: #72767d; margin-right: 5px;">#</span> 慘痛的教訓
+                    <div class="dc-channel-item" onclick="switchDcChannel('view-lesson', this)">
+                        <span style="margin-right: 5px;">#</span> 慘痛的教訓
                     </div>
-                    <div class="dc-channel-item" style="color: #8e9297;">
-                        <span style="color: #72767d; margin-right: 5px;">#</span> 黑歷史
+                    <div class="dc-channel-item" onclick="switchDcChannel('view-history', this)">
+                        <span style="margin-right: 5px;">#</span> 黑歷史
                     </div>
-                    <div class="dc-channel-item" style="color: #8e9297;">
-                        <span style="color: #72767d; margin-right: 5px;">#</span> 關於狼王
+                    <div class="dc-channel-item" onclick="switchDcChannel('view-wolf', this)">
+                        <span style="margin-right: 5px;">#</span> 關於狼王
                     </div>
-                    <div class="dc-channel-item" style="color: #8e9297;">
-                        <span style="color: #72767d; margin-right: 5px;">#</span> 關於白鶴
+                    <div class="dc-channel-item" onclick="switchDcChannel('view-crane', this)">
+                        <span style="margin-right: 5px;">#</span> 關於白鶴
                     </div>
-                    <div class="dc-channel-item" style="color: #f04747;">
-                        <span style="color: #72767d; margin-right: 5px;">🔒</span> 渾噩下半生
+                    <div class="dc-channel-item nsfw-tab" onclick="switchDcChannel('view-nsfw', this)">
+                        <span style="margin-right: 5px;">🔒</span> 渾噩下半生
                     </div>
                 </div>
             </div>
 
-            <!-- 右側聊天區 -->
+            <!-- 右側聊天區 (包含所有頻道，透過 js 切換) -->
             <div class="dc-main">
-                
-                <!-- Chat Header -->
-                <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                    <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
-                    <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">吹水區 (Men's talk)</span>
-                    <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">灰港八狼內部專用，交作業批鬥大會。</span>
+
+                <!-- 頻道 1：吹水區 -->
+                <div id="view-menstalk" class="dc-chat-view active-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
+                        <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">吹水區 (Men's talk)</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">灰港八狼內部專用，交作業批鬥大會。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:30 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    ……你們真他媽厲害。<br>
+                                    我讓你們整理各個分倉的資料放到江湖網上，看看你們交了什麼垃圾。<br>
+                                    北倉的資料在公頻群組外洩，南倉跑去地下PTT發文求救，西倉給我寫了一份酒店公關菜單，西南倉當作發簡訊塞爆我私聊。還有，西北倉，程磊你這個文盲居然還敢花錢雇我徒弟鍵魂幫你代筆？<br>
+                                    七個人裡面，只有阿慶交了一份正常的 Word 檔。你們是打算氣死我還是氣死白先生？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:32 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    操，老子在邊境荒漠天天跟人火拼，哪有時間坐下來打字寫作文啊！<br>
+                                    我出錢你徒弟出力，這叫資源整合好嗎？誰知道那小子寫得那麼文縐縐，還被你抓包。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/3wXCYcD2l3zLKQTJ5puVDY.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,153,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff9900; font-weight: 500; font-size: 15px;">高天龍 (South)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:38 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    別看我，我們南倉的人只會拿拳頭跟鐵鎚講話。阿熙你如果不滿意，你自己來南倉教他們怎麼打字啊，待會一堆錯字又要來唸我了。你知道他們連川哥的名字可能都不會寫。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2aWZ1GHP63EyhnwdDds7Eq.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(102,204,153,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #66cc99; font-weight: 500; font-size: 15px;">陳紹慶 (SouthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:50 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    大家都少說兩句吧。阿熙整理資料也很辛苦的。如果各倉的兄弟不會用 Word，我可以叫種子庫把空白的標準格式模板發給大家嘛。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: 10px 15px 15px;">
+                        <div style="background: #40444b; border-radius: 8px; padding: 12px 15px; display: flex; align-items: center;">
+                            <span style="color: #b9bbbe; margin-right: 15px; font-size: 20px;">+</span>
+                            <span style="color: #72767d; font-size: 14px; flex: 1;">Message #吹水區 (Men's talk)</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 訊息流 (加入了 dc-messages 類別確保可滾動) -->
-                <div class="dc-messages">
-                    
-                    <!-- 林佑熙 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:30 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                ……你們真他媽厲害。<br>
-                                我讓你們整理各個分倉的資料放到江湖網上，看看你們交了什麼垃圾。<br>
-                                北倉的資料在公頻群組外洩，南倉跑去地下PTT發文求救，西倉給我寫了一份酒店公關菜單，西南倉當作發簡訊塞爆我私聊。還有，西北倉，程磊你這個文盲居然還敢花錢雇我徒弟鍵魂幫你代筆？<br>
-                                七個人裡面，只有阿慶交了一份正常的 Word 檔。你們是打算氣死我還是氣死白先生？
+                <!-- 頻道 2：慘痛的教訓 -->
+                <div id="view-lesson" class="dc-chat-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
+                        <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">慘痛的教訓</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px;">紀錄戰損翻車現場、報廢裝備與醫藥費。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 8:15 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    幹，我那台改裝的寶貝越野重機報銷了... 申請維修費，白先生直接把我退件！說什麼「超出常規損耗」？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/1gCzc4Ec8FIlTRFjpoK0zm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,77,77,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff4d4d; font-weight: 500; font-size: 15px;">陳峻傑 (North)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 8:20 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    你那算什麼，我上週把爆破點算錯，不小心炸毀了隔壁半條街的承重牆。現在白先生要從我這季的預算裡扣賠償金！
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/3wXCYcD2l3zLKQTJ5puVDY.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,153,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff9900; font-weight: 500; font-size: 15px;">高天龍 (South)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 8:25 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    我的訂製精鋼巨錘被一個硬骨頭磕崩了一個角。白先生說這算「人為非必要損害」，要我自己貼錢修。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 8:30 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    哼。我的機房被流彈打中，伺服器主機板燒了id=""。這可是軍規級別的，白先生居然叫我去二手市場淘零件？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2aWZ1GHP63EyhnwdDds7Eq.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(102,204,153,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #66cc99; font-weight: 500; font-size: 15px;">陳紹慶 (SouthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 8:40 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    你們就省省吧... 白先生今天早上才跟我說，東南倉下個月的膠帶預算超標，叫我用剩下的自己黏一黏。
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- 程磊 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:32 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                操，老子在邊境荒漠天天跟人火拼，哪有時間坐下來打字寫作文啊！<br>
-                                我出錢你徒弟出力，這叫資源整合好嗎？誰知道那小子寫得那麼文縐縐，還被你抓包。
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 吳諾昊 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/6pozxmyXgoYsvB30CpaqyP.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(85,170,255,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #55aaff; font-weight: 500; font-size: 15px;">吳諾昊 (NorthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:34 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                <i>Scheiße</i> 聞聆風講太多廢話，我已經讓反省了。<br>
-                                但林佑熙，你徒弟竟然接外快代寫報告，你是不是該檢討一下你們東倉的管理紀律？
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 陳峻傑 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/1gCzc4Ec8FIlTRFjpoK0zm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,77,77,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #ff4d4d; font-weight: 500; font-size: 15px;">陳峻傑 (North)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:35 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                哈哈哈哈！至少雷隼是自己動手寫的，只是發錯群組而已嘛！<br>
-                                不像程磊直接花錢找代打。不過雷隼那小子居然把我們出任務前要查黃曆（通勝）的事情抖出來，我等下就去炸了他，媽的。敢出賣師父我啊？
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 高天龍 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/3wXCYcD2l3zLKQTJ5puVDY.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,153,0,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #ff9900; font-weight: 500; font-size: 15px;">高天龍 (South)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:38 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                別看我，我們南倉的人只會拿拳頭跟鐵鎚講話。<br>
-                                鐵壁跑去靠北論壇發文求救，我已經讓他每天晨跑加倍了。阿熙你如果不滿意，你自己來南倉教他們怎麼打字啊，待會一堆錯字又要來唸我了。你知道他們連川哥的名字可能都不會寫。
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 周逸宇 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/2ttmdBp0bcPhlSQ75j2Bs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,0,127,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #ff007f; font-weight: 500; font-size: 15px;">周逸宇 (West)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:41 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                欸，我覺得紅心寫得挺好啊！把我們西倉的特色完全展現出來了。<br>
-                                很有商業頭腦，還順便推銷了包廂業務。這不就是最好的公關宣傳嗎？大家有空多來喝酒啊，我請客。
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 陸永濤 -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/42YI0f7ee1u9DY6MW4guWs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(153,170,187,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #99aabb; font-weight: 500; font-size: 15px;">陸永濤 (SouthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:45 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                歸塵不懂這些科技產品……別看我，我也不想懂。<br>
-                                但，阿熙，你也別拿白先生來壓我。
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 陳紹興(慶) -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/2aWZ1GHP63EyhnwdDds7Eq.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(102,204,153,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #66cc99; font-weight: 500; font-size: 15px;">陳紹慶 (SouthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:50 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                大家都少說兩句吧。阿熙整理資料也很辛苦的。<br>
-                                如果各倉的兄弟不會用 Word，我可以叫種子庫把空白的標準格式模板發給大家嘛。
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 林佑熙 (結尾) -->
-                    <div class="dc-msg-row">
-                        <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
-                        <div class="dc-msg-body">
-                            <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 11:55 PM</span></div>
-                            <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
-                                阿慶，你不要每次都像個老媽子一樣護著他們。<br>
-                                我再說一次，明天早上八點前，如果沒有把正常的文字檔發到我的加密信箱，我就把你們各倉下個月的運作預算全部鎖死。<br>
-                               
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- 聊天輸入框 -->
-                <div style="padding: 10px 15px 15px;">
-                    <div style="background: #40444b; border-radius: 8px; padding: 12px 15px; display: flex; align-items: center;">
-                        <span style="color: #b9bbbe; margin-right: 15px; font-size: 20px;">+</span>
-                        <span style="color: #72767d; font-size: 14px; flex: 1;">Message #吹水區 (Men's talk)</span>
+                <!-- 頻道 3：黑歷史 -->
+                <div id="view-history" class="dc-chat-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
+                        <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">黑歷史</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px;">專人備份八人出糗語音截圖，無法刪除。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2ttmdBp0bcPhlSQ75j2Bs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,0,127,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff007f; font-weight: 500; font-size: 15px;">周逸宇 (West)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Sunday at 2:00 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    <span style="color:#7289da;">[附件圖片：已加密顯示]</span><br>
+                                    上次程磊喝醉抱著電線桿哭著找媽媽的影片，我已經上傳到雲端了。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Sunday at 2:05 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    周逸宇你他媽給我刪掉！信不信我開車把你那間破酒吧撞平！
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/42YI0f7ee1u9DY6MW4guWs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(153,170,187,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #99aabb; font-weight: 500; font-size: 15px;">陸永濤 (SouthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Sunday at 2:10 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    能把這伺服器扔進化學池裡溶解嗎？看著心煩。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Sunday at 2:15 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    放棄吧，我有加密雲端備份，你們就算把東倉炸了，影片和音檔都還在。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/6pozxmyXgoYsvB30CpaqyP.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(85,170,255,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #55aaff; font-weight: 500; font-size: 15px;">吳諾昊 (NorthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Sunday at 2:20 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    Verdammter Stubenhocker.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 頻道 4：關於狼王 -->
+                <div id="view-wolf" class="dc-chat-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
+                        <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">關於狼王</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px;">不敢當面說的心聲倒在這裡。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/3wXCYcD2l3zLKQTJ5puVDY.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,153,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff9900; font-weight: 500; font-size: 15px;">高天龍 (South)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 1:15 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    川哥今天開會的眼神好像要殺人，我是不是又做錯什麼了？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/1gCzc4Ec8FIlTRFjpoK0zm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,77,77,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff4d4d; font-weight: 500; font-size: 15px;">陳峻傑 (North)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 1:20 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    川哥我好愛你但你好可怕.jpg
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                          <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 1:22 PM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    ……他墨鏡不離身你看個屁眼神？
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dc-sys-msg">—— 🐺 沙祁川 進入了伺服器 ——</div>
+
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/1NPXgQcez2OYDf31eTaeuA.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,51,51,0.8);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #fff; font-weight: bold; font-size: 15px;">沙祁川 (Boss)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Yesterday at 1:30 PM</span></div>
+                                <div style="color: #ff3333; font-size: 14px; line-height: 1.5; margin-top: 2px; font-weight: bold;">
+                                    我看得見你們在聊什麼。
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dc-sys-msg">—— 高天龍 已離線 ——</div>
+                        <div class="dc-sys-msg">—— 陳峻傑 已離線 ——</div>
+                        <div class="dc-sys-msg">—— 程磊 已離線 ——</div>
+                    </div>
+                </div>
+
+                <!-- 頻道 5：關於白鶴 -->
+                <div id="view-crane" class="dc-chat-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #72767d; font-size: 20px; margin-right: 10px;">#</span>
+                        <span style="color: white; font-weight: bold; margin-right: 10px; white-space: nowrap;">關於白鶴</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px;">專供被白先生笑眯眯催繳報告或財務坑錢後流淚吐槽。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/42YI0f7ee1u9DY6MW4guWs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(153,170,187,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #99aabb; font-weight: 500; font-size: 15px;">陸永濤 (SouthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 9:00 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    這隻白鶴到底什麼時候才肯批我的化學溶劑經費？他以為屍體會自己蒸發嗎？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2ttmdBp0bcPhlSQ75j2Bs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,0,127,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff007f; font-weight: 500; font-size: 15px;">周逸宇 (West)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 9:05 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    聽說白先生昨天又在查帳了，大家皮繃緊一點。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2aWZ1GHP63EyhnwdDds7Eq.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(102,204,153,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #66cc99; font-weight: 500; font-size: 15px;">陳紹慶 (SouthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 9:15 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    我也想知道物流車隊的油錢要怎麼我們自己想辦法「開源節流」。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2W4GblQYb5FapN5rGbDYNJ.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,255,255,0.7);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #fff; font-weight: bold; font-size: 15px;">白先生 (Finance)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Today at 9:30 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    西倉這個月的酒水報帳有異常，周逸宇，你明天早上八點來我辦公室解釋一下。<br>
+                                    順便，陸永濤，溶劑經費已駁回，請使用低成本替代方案。大家辛苦了。😊
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 頻道 6：渾噩下半生 -->
+                <div id="view-nsfw" class="dc-chat-view">
+                    <div class="dc-main-header" style="padding: 15px; border-bottom: 1px solid #202225; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        <span style="color: #f04747; font-size: 20px; margin-right: 10px;">🔒</span>
+                        <span style="color: #f04747; font-weight: bold; margin-right: 10px; white-space: nowrap;">渾噩下半生</span>
+                        <span style="color: #b9bbbe; font-size: 12px; border-left: 1px solid #4f545c; padding-left: 10px;">唯一加密頻道，酒後發言尺度突破天際。</span>
+                    </div>
+                    <div class="dc-messages">
+                        <div class="dc-sys-msg" style="color: #f04747; border-top: none;">[ 警告：此頻道內容已加密。以下為片段解碼。]</div>
+                        
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2ttmdBp0bcPhlSQ75j2Bs.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,0,127,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ff007f; font-weight: 500; font-size: 15px;">周逸宇 (West)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Friday at 1:00 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    今晚西區有個bar來了幾個新洋妞，素質非常高。各位兄弟要不要來鬆一下？我請客。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/2XqjS836Sri4ag7VDeEdbm.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(255,204,0,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #ffcc00; font-weight: 500; font-size: 15px;">程磊 (NorthWest)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Friday at 1:05 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    留個大包廂給我！我帶西北倉的兄弟過去慶祝昨天火拼沒死。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/6pozxmyXgoYsvB30CpaqyP.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(85,170,255,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #55aaff; font-weight: 500; font-size: 15px;">吳諾昊 (NorthEast)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Friday at 1:10 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    ？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dc-msg-row">
+                            <img src="https://images.plurk.com/7KYUgJVws2LnORF4orpMCi.jpg" class="dc-msg-avatar" style="box-shadow: 0 0 5px rgba(0,255,204,0.5);">
+                            <div class="dc-msg-body">
+                                <div><span style="color: #00ffcc; font-weight: 500; font-size: 15px;">林佑熙 (East)</span> <span style="color: #72767d; font-size: 12px; margin-left: 5px;">Friday at 1:15 AM</span></div>
+                                <div style="color: #dcddde; font-size: 14px; line-height: 1.5; margin-top: 2px;">
+                                    一群發情的禽獸。離我遠點，別把病毒傳染到我的設備上。
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
+
 
     <!-- 人物風雲錄：李晟鋼 (全螢幕彈窗 - 警政高層/機密檔案風格) -->
     <div id="character-modal-lishenggang" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 10, 15, 0.98); z-index: 10000; overflow-y: auto; animation: fadeIn 0.4s ease-out; font-family: 'PMingLiU', 'MingLiU', serif;">
@@ -7388,6 +7609,162 @@
                     <p style="color:#ccc; font-size:13px; margin:0;">
                         親自出席門派節慶並提供資助，以文化與人情手腕取代權力施壓。成功於火印門、衡門等年輕世代中建立隱形影響力，深得部分江湖人士敬重。
                     </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- 機密通訊：四大直系弟子 (全螢幕彈窗 - 加密通訊軟體 UI) -->
+    <div id="modal-disciples-chat" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 10000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        
+        <!-- 加密 APP 專屬 CSS -->
+        <style>
+            .enc-box { margin: 20px auto; width: 95%; max-width: 600px; height: 90vh; background: #0a0a0c; border: 1px solid #1a3a2a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 40px rgba(0,255,100,0.1); position: relative; }
+            .enc-header { padding: 15px; background: #050f0a; border-bottom: 1px solid #113322; text-align: center; color: #00ff66; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .enc-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; -webkit-overflow-scrolling: touch; }
+            
+            .enc-msg-row { display: flex; gap: 15px; width: 100%; }
+            .enc-msg-avatar { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid #333; filter: grayscale(30%) contrast(1.2); }
+            .enc-msg-content { display: flex; flex-direction: column; gap: 5px; max-width: 80%; }
+            .enc-msg-name { font-size: 13px; font-weight: bold; font-family: 'PMingLiU', serif; letter-spacing: 1px; }
+            .enc-msg-bubble { padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; color: #d0d0d0; background: #14161a; border: 1px solid #2a2c30; position: relative; }
+            
+            .enc-sys-msg { color: #00ff66; font-size: 12px; font-family: monospace; text-align: center; margin-bottom: 20px; opacity: 0.8; }
+            
+            @media (max-width: 768px) {
+                .enc-box { margin: 10px auto; width: 98%; height: 95vh; }
+                .enc-msg-content { max-width: 85%; }
+            }
+        </style>
+
+        <div class="enc-box">
+            
+            <!-- 關閉按鈕 -->
+            <span onclick="document.getElementById('modal-disciples-chat').style.display = 'none'" style="position: absolute; top: 10px; right: 15px; color: #00ff66; font-size: 24px; cursor: pointer; z-index: 100; font-family: monospace;">[X]</span>
+
+            <!-- 加密 APP Header -->
+            <div class="enc-header">
+                <span style="font-size: 16px; font-weight: bold; letter-spacing: 4px; margin-bottom: 5px;">GHOST_PROTOCOL</span>
+                <span style="font-size: 10px; opacity: 0.6;">P2P ENCRYPTED SESSION : 4 USERS</span>
+            </div>
+
+            <!-- 訊息流 -->
+            <div class="enc-messages">
+                
+                <div class="enc-sys-msg">
+                    > INITIALIZING...<br>
+                    > 256-BIT AES ENCRYPTION ACTIVE.<br>
+                    > MESSAGES WILL SELF-DESTRUCT IN 24H.
+                </div>
+
+                <!-- 孫胤 (裁火) -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/5i2m7jndZDfgXNZGp5WU8l.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(255,68,68,0.4); border-color: #ff4444;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #ff4444;">裁火 [ COMMANDER ]</div>
+                        <div class="enc-msg-bubble">
+                            說吧。前天晚上南區碼頭那單拋屍案，是你們三個誰幹的？<br>
+                            法醫報告說死者胃裡有海水，身上還綁著廢棄鐵錨。重案組已經立案了，你們誰惹的麻煩自己認。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 朱朔 (夜侯) -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/eqItlLr44foAGTbclMcft.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(212,175,55,0.4); border-color: #d4af37;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #d4af37;">夜侯 [ EAST_CONT ]</div>
+                        <div class="enc-msg-bubble">
+                            大師兄，東洲會是做正經跨國物流的。鐵錨沉海這種沒品味的處理方式，太粗糙了，不符合我們的企業形象。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 洛熠梵 (鴉紅) -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/2jI6hCwlQD8PxxVRdT4TQI.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(255,0,127,0.4); border-color: #ff007f;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #ff007f;">鴉紅 [ MIRROR ]</div>
+                        <div class="enc-msg-bubble">
+                            哎呀，大師兄火氣這麼大。<br>
+                            我們鏡流俱樂部只管喝酒跳舞，我的女孩們連鐵錨都搬不動呢。你去問問三哥，他那邊不是最喜歡接這些「清理」工作嗎？
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 沙祁川 (餘灰) -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/1NPXgQcez2OYDf31eTaeuA.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(139,164,184,0.4); border-color: #8ba4b8;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #8ba4b8;">餘灰 [ ASH_PORT ]</div>
+                        <div class="enc-msg-bubble">
+                            。<br>
+                            妳這是對阿濤專業技術的污衊。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 孫胤 (裁火) 爆氣 -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/5i2m7jndZDfgXNZGp5WU8l.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(255,68,68,0.4); border-color: #ff4444;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #ff4444;">裁火 [ COMMANDER ]</div>
+                        <div class="enc-msg-bubble">
+                            夠了！別以為我不知道死者是北區那個越界的拆家，你們三個全都有動機！<br>
+                            現在警局上面盯得緊，你們最好給我交個人出來結案，不然我今晚就帶反黑組把你們的場子全掃一遍！
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 集體下線 -->
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/eqItlLr44foAGTbclMcft.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(212,175,55,0.4); border-color: #d4af37;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #d4af37;">夜侯 [ EAST_CONT ]</div>
+                        <div class="enc-msg-bubble">我待會還有個跨國視訊會議。先下了。</div>
+                    </div>
+                </div>
+
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/1NPXgQcez2OYDf31eTaeuA.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(139,164,184,0.4); border-color: #8ba4b8;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #8ba4b8;">餘灰 [ ASH_PORT ]</div>
+                        <div class="enc-msg-bubble">灰港今晚盤點。很忙。</div>
+                    </div>
+                </div>
+
+                <div class="enc-msg-row">
+                    <img src="https://images.plurk.com/2jI6hCwlQD8PxxVRdT4TQI.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(255,0,127,0.4); border-color: #ff007f;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #ff007f;">鴉紅 [ MIRROR ]</div>
+                        <div class="enc-msg-bubble">哎呀，我的美容院預約時間到了~ 大哥查案加油喔😘 愛你❤️</div>
+                    </div>
+                </div>
+
+                <div class="enc-sys-msg">
+                    > USER [ 夜侯 ] DISCONNECTED.<br>
+                    > USER [ 餘灰 ] DISCONNECTED.<br>
+                    > USER [ 鴉紅 ] DISCONNECTED.
+                </div>
+
+                <!-- 孫胤無能狂怒 -->
+                <div class="enc-msg-row" style="margin-bottom: 30px;">
+                    <img src="https://images.plurk.com/5i2m7jndZDfgXNZGp5WU8l.jpg" class="enc-msg-avatar" style="box-shadow: 0 0 8px rgba(255,68,68,0.4); border-color: #ff4444;">
+                    <div class="enc-msg-content">
+                        <div class="enc-msg-name" style="color: #ff4444;">裁火 [ COMMANDER ]</div>
+                        <div class="enc-msg-bubble">
+                            ……你們三個混蛋給我回來！
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 加密輸入框 -->
+            <div style="padding: 15px 20px; background: #050f0a; border-top: 1px solid #113322;">
+                <div style="background: #111; border: 1px solid #224433; border-radius: 4px; padding: 12px 15px; display: flex; align-items: center;">
+                    <span style="color: #00ff66; font-family: monospace; font-size: 14px;">> SECURE_MSG : </span>
+                    <span style="color: #444; font-family: monospace; font-size: 14px; margin-left: 10px;">[ SYSTEM LOCKED ]</span>
                 </div>
             </div>
 
