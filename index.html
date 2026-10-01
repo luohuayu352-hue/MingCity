@@ -809,12 +809,13 @@
 
     <!-- 應用主體 -->
     <div id="main-app">
-      <!-- 給標題加上 id 與過渡動畫，並設定固定在頂部 -->
-<header id="top-header" style="position: fixed; top: 0; left: 0; width: 100%; background: #0a0a0a; z-index: 9999; transition: transform 0.3s ease-in-out; border-bottom: 1px solid #222;">
-    <h1 style="margin: 15px 0; color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.8); text-align: center;">鳴市無神</h1>
+ <!-- 頂部毛玻璃透明標題 (自動隱藏) -->
+<header id="top-header" style="position: fixed; top: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; transition: transform 0.3s ease-in-out; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+    <h1 style="margin: 15px 0; color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.8), 0 2px 5px rgba(0,0,0,0.8); text-align: center;">鳴市無神</h1>
 </header>
-<!-- 加上一個隱形的墊高區塊，避免 fixed 固定標題後，把下面的內容擋住 -->
+<!-- 隱形墊高區塊 -->
 <div style="height: 70px;"></div>
+
 
         <main>
             <!-- 分頁1: 鳴市 -->
@@ -3675,25 +3676,26 @@
             </section>
         </main>
 
-          <!-- 底部導航列 -->
-        <nav>
-            <button class="nav-btn active" onclick="switchTab(1)">
-                <span class="icon">城</span>
-                <span>鳴市</span>
-            </button>
-            <button class="nav-btn" onclick="switchTab(2)">
-                <span class="icon">勢</span>
-                <span>勢力</span>
-            </button>
-            <button class="nav-btn" onclick="switchTab(3)">
-                <span class="icon">卷</span>
-                <span>參考</span>
-            </button>
-            <button class="nav-btn" onclick="switchTab(5)">
-                <span class="icon">末</span>
-                <span>其他</span>
-            </button>
-        </nav>
+        <!-- 底部導航列 (加入 id 與滑動隱藏動畫) -->
+<nav id="bottom-nav" style="transition: transform 0.3s ease-in-out; z-index: 9999;">
+    <button class="nav-btn active" onclick="switchTab(1)">
+        <span class="icon">城</span>
+        <span>鳴市</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(2)">
+        <span class="icon">勢</span>
+        <span>勢力</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(3)">
+        <span class="icon">卷</span>
+        <span>參考</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(5)">
+        <span class="icon">末</span>
+        <span>其他</span>
+    </button>
+</nav>
+
     </div>
 
     <!-- 所有的 JavaScript 腳本都統一包在這裡面 -->
@@ -7770,6 +7772,38 @@
 
         </div>
     </div>
+  <!-- 終極上下導航列自動隱藏腳本 (支援內部區塊滑動偵測) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var topHeader = document.getElementById("top-header");
+        var bottomNav = document.getElementById("bottom-nav");
+        var lastScrollY = 0;
+        
+        // 加上 'true' 進行深度捕捉，這樣不管哪個 div 在滑動都能偵測到！
+        window.addEventListener("scroll", function(e) {
+            // 抓取真正正在滑動的那個元素的位置
+            var target = e.target;
+            var currentScrollY = target.scrollTop || window.scrollY;
+            
+            // 如果抓不到距離，就跳過
+            if (currentScrollY === undefined || currentScrollY === null) return;
+            
+            if (currentScrollY > lastScrollY && currentScrollY > 30) {
+                // 往下滑 -> 把上面的推上去 (-100%)，把下面的推下去 (100%)
+                if (topHeader) topHeader.style.transform = "translateY(-100%)";
+                if (bottomNav) bottomNav.style.transform = "translateY(100%)";
+            } else if (currentScrollY < lastScrollY) {
+                // 往上滑 -> 把上下兩邊都彈回來 (0)
+                if (topHeader) topHeader.style.transform = "translateY(0)";
+                if (bottomNav) bottomNav.style.transform = "translateY(0)";
+            }
+            
+            lastScrollY = currentScrollY;
+        }, true); // <-- 這個 true 就是解決你問題的關鍵！
+    });
+</script>
+
+
 
 </body>
 </html>
